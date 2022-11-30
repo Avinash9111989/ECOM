@@ -16,25 +16,27 @@ public class OrderServiceImpl implements OrderService {
 	OrderRepository orderrepo = new OrderRepository();
 	Order order = new Order();
     ProductDetailsRepository prodrepo = new ProductDetailsRepository();
-	@Override
 	public List<Order> displayOrders() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-	@Override
 	public void createOrderService(Customer c) {
 		Scanner scanner = new Scanner(System.in);
-		try {
+		
 			System.out.println("Enter ProductId to make a purchase");
 			
 			int productId=scanner.nextInt();
-			
-			boolean prodstatus = ordervalidation.isValidProductId(productId);
-			if (prodstatus == false) {
+			if (!ordervalidation.isValidProductId(productId)) {
+				try {
 				throw new InvalidProductIdException("Please enter valid productId");
-			} else {
+				}catch (InvalidProductIdException e) {
+					System.out.println(e.getMessage());
+					createOrderService(c);
+				}
+
+				} else {
 				
 				double productPrice=prodrepo.checkProductAmount(productId);
 				order.setProductId(productId);
@@ -42,12 +44,8 @@ public class OrderServiceImpl implements OrderService {
 				order.setAmount(productPrice);
 				orderrepo.createorderrepo(order);
 			}
-		} catch (InvalidProductIdException e) {
-			e.getMessage();
 		}
-
-	}
-
+	
 
 
 	@Override
