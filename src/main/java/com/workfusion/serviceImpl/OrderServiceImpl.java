@@ -6,6 +6,7 @@ import com.workfusion.beans.Customer;
 import com.workfusion.beans.Order;
 import com.workfusion.beans.Product;
 import com.workfusion.exceptions.InvalidProductIdException;
+import com.workfusion.exceptions.InvalidProductTypeException;
 import com.workfusion.repository.OrderRepository;
 import com.workfusion.repository.ProductDetailsRepository;
 import com.workfusion.services.OrderService;
@@ -59,19 +60,30 @@ public class OrderServiceImpl implements OrderService {
     if (orderTypes.size() > 0){
       System.out.println("Types of product choices: ");
       orderTypes.forEach(type -> System.out.print(type + "  "));
+    } else{
+      System.out.println("couldnt find any product types");
+      return;
     }
     System.out.println("\n");
-    System.out.print("enter the product type to categorize your orders: ");
+    System.out.print("enter the product type to categorize your orders by: ");
     Scanner sc = new Scanner(System.in);
-    List<Product> productsByType = orderrepo.getOrdersByCustomerId(c.getCustomerId(), sc.next());
-    if (productsByType.size() == 0) System.out.println("we couldnt find any previous orders of that type");
-    else{
-      System.out.println("**************************************************************");
-      System.out.println("PRODUCTID\tPRODUCTNAME\tPRODUCTPRICE\tPRODUCTTYPE");
-      System.out.println("**************************************************************");
-      productsByType.forEach(p -> System.out.println(p.getProductId() + " \t\t  " + p.getProductName() + " \t "
-        + p.getProductPrice() + " \t\t" + p.getProductType()));
-      System.out.println("**************************************************************");
+    String enteredType = sc.next();
+    try{
+      if (!orderTypes.contains(enteredType.toLowerCase()))
+        throw new InvalidProductTypeException("invalid type entered. enter again ");
+      List<Product> productsByType = orderrepo.getOrdersByCustomerId(c.getCustomerId(), enteredType);
+      if (productsByType.size() == 0) System.out.println("we couldnt find any previous orders of that type");
+      else{
+        System.out.println("**************************************************************");
+        System.out.println("PRODUCTID\tPRODUCTNAME\tPRODUCTPRICE\tPRODUCTTYPE");
+        System.out.println("**************************************************************");
+        productsByType.forEach(p -> System.out.println(p.getProductId() + " \t\t  " + p.getProductName() + " \t "
+          + p.getProductPrice() + " \t\t" + p.getProductType()));
+        System.out.println("**************************************************************");
+      }
+    } catch (Exception e){
+      System.out.println(e.getMessage());
+      displayOrdersByType(c);
     }
   }
 

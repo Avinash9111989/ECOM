@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import com.workfusion.beans.Customer;
 import com.workfusion.serviceImpl.OrderServiceImpl;
@@ -60,7 +61,6 @@ public class CustomerRepository {
   }
 
   public boolean customerLoginRepo(Customer c) throws ClassNotFoundException, SQLException {
-    // TODO Auto-generated method stub
     ResultSet resultset = null;
     boolean loginCheck = false;
     PreparedStatement stmt;
@@ -80,34 +80,41 @@ public class CustomerRepository {
 
           System.out.println("Login Successful!!");
           loginCheck = true;
-          System.out.println("1. view all products \n2. view order by type \nEnter your choice");
-          Scanner sc = new Scanner(System.in);
-          int ch = sc.nextInt();
-          switch (ch) {
-            case 1:
-              prodImpl.displayAllProducts(c);
-              break;
-
-            case 2:
-              ordrImpl.displayOrdersByType(c);
-              break;
-
-            default:
-              System.out.println("invalid choice");
-              break;
-          }
+          showProductOrderMenu(c);
         }
       }
       stmt = con.prepareStatement("update customerlogin set lastActive=now() where customerId=?");
       stmt.setInt(1, c.getCustomerId());
       stmt.executeUpdate();
 
+    } catch (InputMismatchException e){
+      System.out.println(e + "\ttry again:\n");
+      showProductOrderMenu(c);
     } catch (Exception e){
       System.out.println(e.getMessage());;
     } finally{
       con.close();
     }
     return loginCheck;
+  }
+
+  private void showProductOrderMenu(Customer c) {
+    System.out.println("1. view all products \n2. view order by type \nEnter your choice");
+    Scanner sc = new Scanner(System.in);
+    int ch = sc.nextInt();
+    switch (ch) {
+      case 1:
+        prodImpl.displayAllProducts(c);
+        break;
+
+      case 2:
+        ordrImpl.displayOrdersByType(c);
+        break;
+
+      default:
+        System.out.println("invalid choice");
+    }
+    sc.close();
   }
 
 }

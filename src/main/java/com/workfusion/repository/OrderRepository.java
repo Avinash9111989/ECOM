@@ -42,7 +42,7 @@ public class OrderRepository {
         p.setProductId(rs.getInt("productId"));
         p.setProductName(rs.getString("productName"));
         p.setProductPrice(rs.getInt("productPrice"));
-        p.setProductType(rs.getString("productType"));
+        p.setProductType(rs.getString("productType").toLowerCase());
         ordersByType.add(p);
       }
     } catch (Exception e){
