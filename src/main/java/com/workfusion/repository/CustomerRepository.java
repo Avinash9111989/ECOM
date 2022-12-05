@@ -1,5 +1,7 @@
 package com.workfusion.repository;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -21,10 +23,11 @@ public class CustomerRepository {
 	int customerId;
 	ProductDetailsImpl prodImpl = new ProductDetailsImpl();
 
-	public void addNewCustomer(Customer c) throws ClassNotFoundException, SQLException {
+	public void addNewCustomer(Customer c) throws ClassNotFoundException, SQLException, IOException {
 		PreparedStatement stmt = null;
 		try {
 			con = DBConnection.dbConnection();
+			con.setAutoCommit(false);
 			stmt = con.prepareStatement(
 					"insert into customer(custerName,phonenumber,registerdatetime) values(?,?,now())");
 			stmt.setString(1, c.getCustomerName());
@@ -53,6 +56,7 @@ public class CustomerRepository {
 			stmt.setString(3, c.getCustomerPassword());
 
 			stmt.executeUpdate();
+			con.commit();
 			System.out.println(" Registration Successfull!! please Login");
 
 		}
@@ -72,10 +76,10 @@ public class CustomerRepository {
 		PreparedStatement stmt;
 		try {
 			con = DBConnection.dbConnection();
-			 stmt= con.prepareStatement(
+			stmt = con.prepareStatement(
 					"select customerId,count(*) from customerLogin where customeruserName=? and customerPassword=?");
-			 stmt.setString(1, c.getCustomerUsername());
-			 stmt.setString(2, c.getCustomerPassword());
+			stmt.setString(1, c.getCustomerUsername());
+			stmt.setString(2, c.getCustomerPassword());
 			resultset = stmt.executeQuery();
 			while (resultset.next()) {
 				c.setCustomerId(resultset.getInt(1));
@@ -89,11 +93,10 @@ public class CustomerRepository {
 					prodImpl.displayAllProducts(c);
 				}
 			}
-			 stmt = con
-					.prepareStatement("update customerlogin set lastActive=now() where customerId=?");
-			 stmt.setInt(1, c.getCustomerId());
-			 stmt.executeUpdate();
-			
+			stmt = con.prepareStatement("update customerlogin set lastActive=now() where customerId=?");
+			stmt.setInt(1, c.getCustomerId());
+			stmt.executeUpdate();
+
 		} catch (Exception e) {
 			e.getMessage();
 		} finally {
